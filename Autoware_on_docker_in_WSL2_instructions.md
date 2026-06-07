@@ -140,7 +140,7 @@ sudo sysctl -w net.core.rmem_default=2147483647
 
 This will prevent error like: `ros2: failed to increase socket receive buffer size to at least 10485760 bytes, current is 425984 bytes`
 
-## Start the docker image
+# Start the docker image
 
 ```bash
 cd autoware
@@ -229,40 +229,9 @@ source install/setup.bash
 
 
 
-Basic detection and tracking works now.
-
-recap, the following things are running:
-
-- Docker Desktop
-- WSL2 shells with:
-  - The above mentioned `ros2 launch autoware_launch`
-  - `ros2 run tf2_ros static_transform_publisher 0 0 1.8 0 0 0 base_link velodyne`
-  - ./velodyne_to_autoware.py
-  - `ros2 run topic_tools relay \ \
-  /perception/obstacle_segmentation/single_frame/pointcloud \
-  /perception/obstacle_segmentation/pointcloud`
-  - `ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map base_link`
-  - `ros2 run topic_tools relay   /perception/object_recognition/detection/clustering/objects   /perception/object_recognition/detection/objects`
-
-```
-ros2 run topic_tools relay \
-  /perception/object_recognition/detection/clustering/objects \
-  /perception/object_recognition/detection/centerpoint/objects
-```
-
-Tracked objects with unique ID's are here:
-
-```
-ros2 topic echo /perception/object_recognition/tracking/objects --once
-```
 
 
 
-Nice trick to start a WSL shell with ros automatically setup: 
-
-```bat
-cmd.exe /c start wsl -d Ubuntu-22.04 bash -lc "source /opt/ros/humble/setup.bash ; exec bash"
-```
 
 
 
@@ -336,12 +305,21 @@ Launching may take a bit of time, but eventually an rvis2 gui should be launched
 
 Now that the pipeline from @sec:modified-pipeline is running, we can "feed" it with recorded Velodyne LiDAR data:
 
-Play in a loop:
+Play in a loop e.g.:
 ```bash
 ros2 bag play /bags/rosbag2_2026_04_23-18_07_40_stationary_cart_random_walking_person -l
 ```
+Please note when playing in a loop that the tracking will remember the tracked objects from the end of the previous loop. So don't be surprised if things get messy when looping.
 
 ## View tracked objects
+Tracked objects with unique ID's are in topic `/perception/object_recognition/tracking/objects`. You can have a look at the raw data with:
+
+```bash 
+ros2 topic echo /perception/object_recognition/tracking/objects --once
+```
+You can also enable this view in the the rvis2 gui.
+
+In rvis2, change view to ThirdPersonView 
 
 # rqt_graph
 
